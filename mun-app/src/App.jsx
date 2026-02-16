@@ -478,13 +478,45 @@ const App = () => {
                     </button>
                   </div>
 
-                  {aiResult && (
-                    <div className="mt-8 bg-white/[0.05] p-10 rounded-[2.5rem] border border-[#00ff88]/20 max-h-[300px] overflow-y-auto custom-scrollbar">
-                      <div className="text-sm font-light leading-loose text-gray-200 whitespace-pre-line">
-                        {aiResult}
+                  {/* Nuevo Formato de Propuesta DEST MX */}
+                  <div className="space-y-6">
+                    {aiResult ? (
+                      <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        {/* Encabezado de la Propuesta */}
+                        <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-4">
+                          <div className="flex items-center gap-2 text-[#00ff88]">
+                            <Target size={16} />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Plan de Incidencia Territorial</span>
+                          </div>
+                          <div className="text-gray-500 text-[9px] font-mono">ID-STRAT: {Math.random().toString(36).substr(2, 9).toUpperCase()}</div>
+                        </div>
+
+                        {/* Cuerpo de la Respuesta con mejor estilo */}
+                        <div className="bg-white/[0.02] backdrop-blur-md p-8 rounded-[2rem] border border-white/5 max-h-[400px] overflow-y-auto custom-scrollbar">
+                          <div className="prose prose-invert prose-sm max-w-none">
+                            {/* Aquí la IA entregará su contenido */}
+                            <div className="text-gray-300 leading-relaxed font-light whitespace-pre-line">
+                              {aiResult}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Botones de Acción Posterior */}
+                        <div className="grid grid-cols-2 gap-4 mt-6">
+                          <button className="flex items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-widest border rounded-full border-white/10 hover:bg-white/5 transition-all">
+                            <ImageIcon size={14} /> Visualizar Render AR
+                          </button>
+                          <button className="flex items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-widest border rounded-full border-[#00ff88]/20 text-[#00ff88] hover:bg-[#00ff88]/10 transition-all">
+                            <FileText size={14} /> Exportar PDF Táctico
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="text-center py-20">
+                        <p className="text-gray-600 italic">"La infraestructura de marca comienza con una visión..."</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
