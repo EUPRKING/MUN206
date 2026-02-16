@@ -222,21 +222,26 @@ const App = () => {
     setAiResult(null);
     setAiLoading(true);
     try {
-      const prompt = `Actúa como Director Creativo de DEST MX. Genera una "Estrategia de Monumentalidad Táctica" para: "${userInput}". 
-      ESTRUCTURA OBLIGATORIA:
-      ## 1. ANÁLISIS DEL TERRENO
-      (Descripción del impacto)
-      ## 2. INTERVENCIÓN TÁCTICA
-      (Usa lista con viñetas para los productos de DEST MX involucrados)
-      ## 3. VISIÓN MONUMENTAL
-      (Conclusión profesional)`;
-      const result = await callGemini(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
-        { contents: [{ parts: [{ text: prompt }] }] }
-      );
-      setAiResult(result.candidates?.[0]?.content?.parts?.[0]?.text);
-    } catch (err) { setAiResult("Error en la consultoría."); }
-    finally { setAiLoading(false); }
+      // URL CORREGIDA: Debe terminar en :generateContent
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: `Actúa como Director Creativo de DEST MX. Genera una estrategia para: ${userInput}` }] }]
+        })
+      });
+
+      if (!response.ok) throw new Error('Error en la respuesta de la API');
+      
+      const data = await response.json();
+      setAiResult(data.candidates?.[0]?.content?.parts?.[0]?.text);
+    } catch (err) { 
+      setAiResult("Error en la consultoría. Verifica la URL del modelo."); 
+    } finally { 
+      setAiLoading(false); 
+    }
   };
 
   const handleVisualizeIdea = async () => {
