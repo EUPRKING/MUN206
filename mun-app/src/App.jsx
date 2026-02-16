@@ -167,7 +167,10 @@ const App = () => {
         const errorBody = await response.json().catch(() => null);
         const message = errorBody?.error?.message || `Error: ${response.status}`;
         throw new Error(message);
-      }
+      } else if (response.status === 429) { // Manejo específico para cuota excedida
+        const errorBody = await response.json().catch(() => null);
+        const message = errorBody?.error?.message || "Cuota de API excedida. Por favor, espera o verifica tu plan de facturación.";
+        throw new Error(message);      }
       return await response.json();
     } catch (error) {
       if (retries > 0) {
@@ -226,7 +229,8 @@ const App = () => {
     setShowAiModal(true); // Mostrar el modal
     try {
       const prompt = `Actúa como Director Creativo de DEST MX. Genera una estrategia para: ${userInput}`;
-      const result = await callGemini( // Usar gemini-2.0-flash para generación de texto
+      const result = await callGemini( // Corregido: Pasar endpoint y payload
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
         { contents: [{ parts: [{ text: prompt }] }] }
       );
       setAiResult(result.candidates?.[0]?.content?.parts?.[0]?.text);
