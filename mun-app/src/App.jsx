@@ -29,6 +29,7 @@ import {
 
 // API Configuration
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+console.log("Estado de la Clave:", apiKey ? "Cargada ✅" : "No encontrada ❌");
 
 const products = [
   {
