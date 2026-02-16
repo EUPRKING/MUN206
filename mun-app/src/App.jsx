@@ -197,8 +197,8 @@ const App = () => {
   const handleTTS = async (text) => {
     setAiLoading(true);
     try {
-      const result = await callGemini(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent',
+      const result = await callGemini( // Usar gemini-2.0-flash para TTS
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
         { 
           contents: [{ parts: [{ text: `Dilo con una voz elegante y tecnológica: ${text}` }] }],
           generationConfig: { 
@@ -214,31 +214,25 @@ const App = () => {
         await audio.play();
       }
     } catch (err) { console.error("TTS failed", err); }
-    finally { setAiLoading(false); }
+    finally { setAiLoading(false); setAiResult("Error al generar el audio. Intenta de nuevo."); }
   };
 
+  // Refactorizado para usar callGemini
   const handleGenerateStrategy = async () => {
     if (!userInput) return;
     setAiResult(null);
     setAiLoading(true);
+    setAiMode('strategy'); // Asegurarse de que el modo sea 'strategy'
+    setShowAiModal(true); // Mostrar el modal
     try {
-      // URL CORREGIDA: Debe terminar en :generateContent
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-      
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: `Actúa como Director Creativo de DEST MX. Genera una estrategia para: ${userInput}` }] }]
-        })
-      });
-
-      if (!response.ok) throw new Error('Error en la respuesta de la API');
-      
-      const data = await response.json();
-      setAiResult(data.candidates?.[0]?.content?.parts?.[0]?.text);
+      const prompt = `Actúa como Director Creativo de DEST MX. Genera una estrategia para: ${userInput}`;
+      const result = await callGemini( // Usar gemini-2.0-flash para generación de texto
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+        { contents: [{ parts: [{ text: prompt }] }] }
+      );
+      setAiResult(result.candidates?.[0]?.content?.parts?.[0]?.text);
     } catch (err) { 
-      setAiResult("Error en la consultoría. Verifica la URL del modelo."); 
+      setAiResult(`Error en la consultoría: ${err.message}. Intenta de nuevo.`); 
     } finally { 
       setAiLoading(false); 
     }
@@ -252,10 +246,10 @@ const App = () => {
     try {
       const prompt = `Luxury hospitality concept for Mexico 2026 activation. Description: ${userInput}. Photographic architectural render.`;
       const result = await callGemini(
-        'https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict',
+        'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict', // Usar imagen-3.0-generate-001
         { instances: { prompt }, parameters: { sampleCount: 1 } }
       );
-      setAiResult(`data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`);
+      setAiResult(`data:image/png;base64,${result.predictions?.[0]?.bytesBase64Encoded}`);
     } catch (err) { setAiResult(null); }
     finally { setAiLoading(false); }
   };
@@ -267,11 +261,11 @@ const App = () => {
     try {
       const prompt = `High-end architectural visualization, futuristic soccer world cup 2026 brand activation in Mexico. Based on this concept: ${strategyText.substring(0, 300)}. Photorealistic, 8k, cinematic lighting.`;
       const result = await callGemini(
-        'https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict',
+        'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict', // Usar imagen-3.0-generate-001
         { instances: { prompt }, parameters: { sampleCount: 1 } }
       );
-      setAiMode('image');
-      setAiResult(`data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`);
+      setAiMode('image'); // Asegurarse de que el modo sea 'image'
+      setAiResult(`data:image/png;base64,${result.predictions?.[0]?.bytesBase64Encoded}`);
     } catch (err) { setAiResult(null); setAiMode('image'); }
     finally { setAiLoading(false); }
   };
@@ -529,9 +523,9 @@ const App = () => {
                   {/* Nuevo Formato de Propuesta DEST MX */}
                   <div className="space-y-6">
                     {aiMode === 'image' ? (
-                      <div className="animate-in fade-in zoom-in duration-500">
+                      <div className="duration-500 animate-in fade-in zoom-in">
                         <div className="rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl aspect-video bg-black/50 flex items-center justify-center mb-6">
-                          {aiResult ? <img src={aiResult} alt="Render AR" className="w-full h-full object-cover" /> : <p className="text-gray-600 text-xs">Sin render disponible.</p>}
+                          {aiResult ? <img src={aiResult} alt="Render AR" className="object-cover w-full h-full" /> : <p className="text-xs text-gray-600">Sin render disponible.</p>}
                         </div>
                         {savedStrategy && (
                           <div className="flex justify-center">
@@ -545,10 +539,10 @@ const App = () => {
                         )}
                       </div>
                     ) : (
-                      <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                      <div className="duration-700 animate-in fade-in slide-in-from-bottom-4">
                         {/* Encabezado de la Propuesta */}
                         {(aiResult || aiLoading) && (
-                          <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-4">
+                          <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
                             <div className="flex items-center gap-2 text-[#00ff88]">
                               <Target size={16} />
                               <span className="text-[10px] font-black uppercase tracking-[0.3em]">Plan de Incidencia Territorial</span>
@@ -559,9 +553,9 @@ const App = () => {
 
                         {/* Cuerpo de la Respuesta con mejor estilo */}
                         <div className="bg-white/[0.02] backdrop-blur-md p-8 rounded-[2rem] border border-white/5 max-h-[400px] overflow-y-auto custom-scrollbar">
-                          <div className="prose prose-invert prose-sm max-w-none">
+                          <div className="prose-sm prose prose-invert max-w-none">
                             {/* Corrección de Renderizado DEST MX */}
-                            <div className="text-gray-300 leading-relaxed font-light text-sm">
+                            <div className="text-sm font-light leading-relaxed text-gray-300">
                               {aiLoading ? (
                                 <div className="flex flex-col items-center py-10">
                                   <Loader2 className="animate-spin text-[#00ff88] mb-4" size={40} />
@@ -569,12 +563,12 @@ const App = () => {
                                 </div>
                               ) : (
                                 aiResult ? (
-                                  <div className="animate-in fade-in duration-700">
+                                  <div className="duration-700 animate-in fade-in">
                                     {/* Usamos un div simple si ReactMarkdown falla para asegurar que el texto se vea */}
                                     <p className="whitespace-pre-line">{aiResult}</p> 
                                   </div>
                                 ) : (
-                                  <p className="text-gray-600 italic">Esperando descripción del evento...</p>
+                                  <p className="italic text-gray-600">Esperando descripción del evento...</p>
                                 )
                               )}
                             </div>
