@@ -210,6 +210,7 @@ const App = () => {
 
   const handleGenerateStrategy = async () => {
     if (!userInput) return;
+    setAiResult(null);
     setAiLoading(true);
     setAiMode('strategy');
     setShowAiModal(true);
@@ -270,7 +271,7 @@ const App = () => {
     <div className="w-full">
       <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-end gap-3">
         <button 
-          onClick={() => { setShowAiModal(true); setAiMode('strategy'); setSavedStrategy(null); }}
+          onClick={() => { setShowAiModal(true); setAiMode('strategy'); setAiResult(null); setSavedStrategy(null); }}
           className="bg-gradient-to-tr from-[#00ff88] to-[#00f2ff] p-4 rounded-full shadow-[0_0_30px_rgba(0,255,136,0.5)] hover:scale-110 transition-transform flex items-center gap-2 group"
         >
           <Sparkles className="text-black" />
