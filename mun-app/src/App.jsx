@@ -241,7 +241,7 @@ const App = () => {
     <div className="w-full">
       <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-end gap-3">
         <button 
-          onClick={() => { setShowAiModal(true); setAiMode('strategy'); setAiResult(null); }}
+          onClick={() => { setShowAiModal(true); setAiMode('strategy'); }}
           className="bg-gradient-to-tr from-[#00ff88] to-[#00f2ff] p-4 rounded-full shadow-[0_0_30px_rgba(0,255,136,0.5)] hover:scale-110 transition-transform flex items-center gap-2 group"
         >
           <Sparkles className="text-black" />
@@ -458,14 +458,33 @@ const App = () => {
                 </div>
               ) : (
                 <div className="space-y-8">
-                  <div className="bg-white/[0.03] p-10 rounded-[2.5rem] border border-white/10 max-h-[450px] overflow-y-auto custom-scrollbar">
-                    <div className="text-gray-300 leading-loose font-light whitespace-pre-line text-sm selection:bg-[#00ff88] selection:text-black">
-                      {aiResult || "Esperando datos..."}
+                  <div className="bg-white/[0.03] p-6 rounded-[2.5rem] border border-white/10">
+                    <textarea
+                      value={userInput}
+                      onChange={(e) => setUserInput(e.target.value)}
+                      placeholder="Describe tu evento (ej: Final en el Estadio Azteca para 500 VIPs)..."
+                      className="w-full h-32 text-gray-300 bg-transparent border-none resize-none focus:ring-0 placeholder:text-gray-600"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between pt-8 border-t border-white/5">
+                    <button 
+                      onClick={handleGenerateStrategy}
+                      disabled={aiLoading || !userInput}
+                      className="bg-[#00ff88] text-black font-black px-8 py-3 rounded-full uppercase text-[10px] tracking-widest hover:bg-white disabled:opacity-50 transition-all flex items-center gap-2"
+                    >
+                      {aiLoading ? <Loader2 className="animate-spin" size={14} /> : <Send size={14} />}
+                      Generar Estrategia
+                    </button>
+                  </div>
+
+                  {aiResult && (
+                    <div className="mt-8 bg-white/[0.05] p-10 rounded-[2.5rem] border border-[#00ff88]/20 max-h-[300px] overflow-y-auto custom-scrollbar">
+                      <div className="text-sm font-light leading-loose text-gray-200 whitespace-pre-line">
+                        {aiResult}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex justify-end pt-8 border-t border-white/5">
-                    <button onClick={() => setShowAiModal(false)} className="px-8 py-3 text-xs font-black tracking-widest uppercase transition-all border rounded-full bg-white/5 border-white/10 hover:bg-white hover:text-black">Cerrar</button>
-                  </div>
+                  )}
                 </div>
               )}
             </div>
