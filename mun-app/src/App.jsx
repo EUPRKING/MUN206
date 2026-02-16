@@ -316,10 +316,21 @@ const App = () => {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
             {filteredProducts.map((product) => (
-              <div key={product.id} className="flex flex-col h-full bg-[#111] rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-[#00ff88]/30 transition-all duration-500 group">
-                <div className="w-full h-64 overflow-hidden">
-                  <img src={product.img} alt={product.name} className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110 grayscale sm:group-hover:grayscale-0" />
+              <div key={product.id} className="group bg-[#111] rounded-[2rem] overflow-hidden border border-white/5 hover:border-[#00ff88]/30 transition-all duration-500">
+              <div className="aspect-[4/5] overflow-hidden relative">
+                <img src={product.img} alt={product.name} className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110 grayscale sm:group-hover:grayscale-0" />
+              </div>
+              <div className="p-6 md:p-8">
+                <div className="flex items-start justify-between mb-3 md:mb-4">
+                  <h3 className="text-xl font-bold tracking-tight md:text-2xl">{product.name}</h3>
+                  <p className="text-[#00f2ff] font-mono text-sm">{product.price}</p>
                 </div>
+                <p className="mb-6 text-xs leading-relaxed text-gray-400 md:text-sm line-clamp-3">{product.description}</p>
+                <div className="flex items-center justify-between pt-4 border-t md:pt-6 border-white/5">
+                  <span className="text-[9px] md:text-[10px] text-gray-500 uppercase tracking-widest font-bold">MOQ: {product.moq}</span>
+                  <a href="#contacto" className="text-[10px] md:text-xs font-black uppercase tracking-widest hover:text-[#00ff88] transition-colors flex items-center gap-2">Detalles <ArrowUpRight size={14} /></a>
+                </div>
+              </div> {/* Cierre del div de la tarjeta de producto */}
               </div>
             ))}
           </div>
