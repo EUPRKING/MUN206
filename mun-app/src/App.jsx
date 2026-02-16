@@ -201,7 +201,7 @@ const App = () => {
     setAiLoading(true);
     try {
       const result = await callGemini( // Usar gemini-2.0-flash para TTS
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', // Cambio de modelo a gemini-1.5-flash
         { 
           contents: [{ parts: [{ text: `Dilo con una voz elegante y tecnológica: ${text}` }] }],
           generationConfig: { 
@@ -216,8 +216,8 @@ const App = () => {
         const audio = new Audio(URL.createObjectURL(pcmToWav(audioPart.inlineData.data, parseInt(sampleRate))));
         await audio.play();
       }
-    } catch (err) { console.error("TTS failed", err); }
-    finally { setAiLoading(false); setAiResult("Error al generar el audio. Intenta de nuevo."); }
+    } catch (err) { console.warn('Voz temporalmente no disponible por límite de cuota o error: ', err.message); } // Mensaje de error más específico y no bloqueante
+    finally { setAiLoading(false); }
   };
 
   // Refactorizado para usar callGemini
@@ -229,7 +229,7 @@ const App = () => {
     setShowAiModal(true); // Mostrar el modal
     try {
       const prompt = `Actúa como Director Creativo de DEST MX. Genera una estrategia para: ${userInput}`;
-      const result = await callGemini( // Corregido: Pasar endpoint y payload
+      const result = await callGemini( // Usa gemini-1.5-flash con v1beta, la URL se completa en callGemini
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
         { contents: [{ parts: [{ text: prompt }] }] }
       );
