@@ -227,7 +227,6 @@ const App = () => {
     try {
       const prompt = `Actúa como Director Creativo de DEST MX. Genera una estrategia para: ${userInput}`;
       const result = await callGemini( // Usar gemini-2.0-flash para generación de texto
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
         { contents: [{ parts: [{ text: prompt }] }] }
       );
       setAiResult(result.candidates?.[0]?.content?.parts?.[0]?.text);
