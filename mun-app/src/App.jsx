@@ -500,13 +500,7 @@ const App = () => {
                   {aiMode === 'strategy' ? 'Estrategia MUN 2026 ✨' : aiMode === 'image' ? 'Concepto Visual ✨' : 'Análisis Táctico ✨'}
                 </h3>
               </div>
-              {aiLoading ? (
-                <div className="flex flex-col items-center justify-center gap-6 py-24">
-                  <Loader2 className="animate-spin text-[#00ff88]" size={64} />
-                  <p className="text-xs font-mono text-gray-600 animate-pulse tracking-[0.4em] uppercase">Procesando Inteligencia...</p>
-                </div>
-              ) : (
-                <div className="space-y-8">
+              <div className="space-y-8">
                   <div className="bg-white/[0.03] p-6 rounded-[2.5rem] border border-white/10">
                     <textarea
                       value={userInput}
@@ -545,53 +539,58 @@ const App = () => {
                           </div>
                         )}
                       </div>
-                    ) : aiResult ? (
+                    ) : (
                       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                         {/* Encabezado de la Propuesta */}
-                        <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-4">
-                          <div className="flex items-center gap-2 text-[#00ff88]">
-                            <Target size={16} />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Plan de Incidencia Territorial</span>
+                        {(aiResult || aiLoading) && (
+                          <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-4">
+                            <div className="flex items-center gap-2 text-[#00ff88]">
+                              <Target size={16} />
+                              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Plan de Incidencia Territorial</span>
+                            </div>
+                            <div className="text-gray-500 text-[9px] font-mono">ID-STRAT: {Math.random().toString(36).substr(2, 9).toUpperCase()}</div>
                           </div>
-                          <div className="text-gray-500 text-[9px] font-mono">ID-STRAT: {Math.random().toString(36).substr(2, 9).toUpperCase()}</div>
-                        </div>
+                        )}
 
                         {/* Cuerpo de la Respuesta con mejor estilo */}
                         <div className="bg-white/[0.02] backdrop-blur-md p-8 rounded-[2rem] border border-white/5 max-h-[400px] overflow-y-auto custom-scrollbar">
                           <div className="prose prose-invert prose-sm max-w-none">
+                            {/* Corrección de Renderizado DEST MX */}
                             <div className="text-gray-300 leading-relaxed font-light text-sm">
-                              <ReactMarkdown 
-                                components={{
-                                  h2: ({node, ...props}) => <h2 className="text-[#00ff88] font-black uppercase tracking-widest mt-8 mb-4 border-l-4 border-[#00ff88] pl-4" {...props} />,
-                                  li: ({node, ...props}) => <li className="mb-3 list-disc list-inside text-gray-400 marker:text-[#00f2ff]" {...props} />,
-                                  strong: ({node, ...props}) => <strong className="text-[#00f2ff] font-bold" {...props} />,
-                                  p: ({node, ...props}) => <p className="mb-4" {...props} />
-                                }}
-                              >
-                                {aiResult}
-                              </ReactMarkdown>
+                              {aiLoading ? (
+                                <div className="flex flex-col items-center py-10">
+                                  <Loader2 className="animate-spin text-[#00ff88] mb-4" size={40} />
+                                  <p className="text-[10px] uppercase tracking-widest animate-pulse">Sincronizando Inteligencia...</p>
+                                </div>
+                              ) : (
+                                aiResult ? (
+                                  <div className="animate-in fade-in duration-700">
+                                    {/* Usamos un div simple si ReactMarkdown falla para asegurar que el texto se vea */}
+                                    <p className="whitespace-pre-line">{aiResult}</p> 
+                                  </div>
+                                ) : (
+                                  <p className="text-gray-600 italic">Esperando descripción del evento...</p>
+                                )
+                              )}
                             </div>
                           </div>
                         </div>
                         
                         {/* Botones de Acción Posterior */}
-                        <div className="grid grid-cols-2 gap-4 mt-6">
-                          <button onClick={handleRenderFromStrategy} className="flex items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-widest border rounded-full border-white/10 hover:bg-white/5 transition-all">
-                            <ImageIcon size={14} /> Visualizar Render AR
-                          </button>
-                          <button onClick={handleExportPDF} className="flex items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-widest border rounded-full border-[#00ff88]/20 text-[#00ff88] hover:bg-[#00ff88]/10 transition-all">
-                            <FileText size={14} /> Exportar PDF Táctico
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-center py-20">
-                        <p className="text-gray-600 italic">"La infraestructura de marca comienza con una visión..."</p>
+                        {aiResult && (
+                          <div className="grid grid-cols-2 gap-4 mt-6">
+                            <button onClick={handleRenderFromStrategy} className="flex items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-widest border rounded-full border-white/10 hover:bg-white/5 transition-all">
+                              <ImageIcon size={14} /> Visualizar Render AR
+                            </button>
+                            <button onClick={handleExportPDF} className="flex items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-widest border rounded-full border-[#00ff88]/20 text-[#00ff88] hover:bg-[#00ff88]/10 transition-all">
+                              <FileText size={14} /> Exportar PDF Táctico
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
                 </div>
-              )}
             </div>
           </div>
         </div>
