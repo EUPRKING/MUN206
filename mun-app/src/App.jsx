@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './index.css';
+import ReactMarkdown from 'react-markdown';
+import { jsPDF } from 'jspdf';
 import { 
   Shield, 
   Smartphone, 
@@ -128,6 +130,7 @@ const App = () => {
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiMode, setAiMode] = useState('text'); // 'text', 'image', 'strategy'
   const [userInput, setUserInput] = useState('');
+  const [savedStrategy, setSavedStrategy] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -237,11 +240,37 @@ const App = () => {
     finally { setAiLoading(false); }
   };
 
+  const handleRenderFromStrategy = async () => {
+    const strategyText = aiResult;
+    setSavedStrategy(strategyText);
+    setAiLoading(true);
+    try {
+      const prompt = `High-end architectural visualization, futuristic soccer world cup 2026 brand activation in Mexico. Based on this concept: ${strategyText.substring(0, 300)}. Photorealistic, 8k, cinematic lighting.`;
+      const result = await callGemini(
+        'https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict',
+        { instances: { prompt }, parameters: { sampleCount: 1 } }
+      );
+      setAiMode('image');
+      setAiResult(`data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`);
+    } catch (err) { setAiResult(null); setAiMode('image'); }
+    finally { setAiLoading(false); }
+  };
+
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    doc.setFont("helvetica", "bold");
+    doc.text("DEST MX: ESTRATEGIA MONUMENTAL 2026", 10, 10);
+    doc.setFont("helvetica", "normal");
+    const splitText = doc.splitTextToSize(aiResult, 180);
+    doc.text(splitText, 10, 20);
+    doc.save("Propuesta_DEST_MX.pdf");
+  };
+
   return (
     <div className="w-full">
       <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-end gap-3">
         <button 
-          onClick={() => { setShowAiModal(true); setAiMode('strategy'); }}
+          onClick={() => { setShowAiModal(true); setAiMode('strategy'); setSavedStrategy(null); }}
           className="bg-gradient-to-tr from-[#00ff88] to-[#00f2ff] p-4 rounded-full shadow-[0_0_30px_rgba(0,255,136,0.5)] hover:scale-110 transition-transform flex items-center gap-2 group"
         >
           <Sparkles className="text-black" />
@@ -480,7 +509,23 @@ const App = () => {
 
                   {/* Nuevo Formato de Propuesta DEST MX */}
                   <div className="space-y-6">
-                    {aiResult ? (
+                    {aiMode === 'image' ? (
+                      <div className="animate-in fade-in zoom-in duration-500">
+                        <div className="rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl aspect-video bg-black/50 flex items-center justify-center mb-6">
+                          {aiResult ? <img src={aiResult} alt="Render AR" className="w-full h-full object-cover" /> : <p className="text-gray-600 text-xs">Sin render disponible.</p>}
+                        </div>
+                        {savedStrategy && (
+                          <div className="flex justify-center">
+                            <button 
+                              onClick={() => { setAiResult(savedStrategy); setAiMode('strategy'); }}
+                              className="flex items-center gap-2 px-6 py-3 text-[10px] font-bold uppercase tracking-widest border rounded-full border-white/10 hover:bg-white/5 transition-all text-[#00ff88]"
+                            >
+                              <ChevronRight className="rotate-180" size={14} /> Volver a la Estrategia
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ) : aiResult ? (
                       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                         {/* Encabezado de la Propuesta */}
                         <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-4">
@@ -495,18 +540,26 @@ const App = () => {
                         <div className="bg-white/[0.02] backdrop-blur-md p-8 rounded-[2rem] border border-white/5 max-h-[400px] overflow-y-auto custom-scrollbar">
                           <div className="prose prose-invert prose-sm max-w-none">
                             {/* Aquí la IA entregará su contenido */}
-                            <div className="text-gray-300 leading-relaxed font-light whitespace-pre-line">
-                              {aiResult}
+                            <div className="text-gray-300 leading-relaxed font-light text-sm">
+                              <ReactMarkdown 
+                                components={{
+                                  h2: ({node, ...props}) => <h2 className="text-[#00ff88] font-black uppercase tracking-widest mt-6 mb-2 border-l-4 border-[#00ff88] pl-3" {...props} />,
+                                  li: ({node, ...props}) => <li className="mb-2 list-disc list-inside text-gray-400" {...props} />,
+                                  strong: ({node, ...props}) => <strong className="text-[#00f2ff] font-bold" {...props} />
+                                }}
+                              >
+                                {aiResult}
+                              </ReactMarkdown>
                             </div>
                           </div>
                         </div>
                         
                         {/* Botones de Acción Posterior */}
                         <div className="grid grid-cols-2 gap-4 mt-6">
-                          <button className="flex items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-widest border rounded-full border-white/10 hover:bg-white/5 transition-all">
+                          <button onClick={handleRenderFromStrategy} className="flex items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-widest border rounded-full border-white/10 hover:bg-white/5 transition-all">
                             <ImageIcon size={14} /> Visualizar Render AR
                           </button>
-                          <button className="flex items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-widest border rounded-full border-[#00ff88]/20 text-[#00ff88] hover:bg-[#00ff88]/10 transition-all">
+                          <button onClick={handleExportPDF} className="flex items-center justify-center gap-2 py-3 text-[10px] font-bold uppercase tracking-widest border rounded-full border-[#00ff88]/20 text-[#00ff88] hover:bg-[#00ff88]/10 transition-all">
                             <FileText size={14} /> Exportar PDF Táctico
                           </button>
                         </div>
