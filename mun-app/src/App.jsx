@@ -31,7 +31,6 @@ import {
 
 // API Configuration
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-console.log("Estado de la Clave:", apiKey ? "Cargada ✅" : "No encontrada ❌");
 
 const products = [
   {
@@ -158,7 +157,11 @@ const App = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (!response.ok) throw new Error(`API Error: ${response.status}`);
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => null);
+        const message = errorBody?.error?.message || `Error: ${response.status}`;
+        throw new Error(message);
+      }
       return await response.json();
     } catch (error) {
       if (retries > 0) {
@@ -217,7 +220,7 @@ const App = () => {
     try {
       const prompt = `Actúa como Director Creativo de DEST MX. El cliente describe su evento así: "${userInput}". Genera una "Estrategia de Monumentalidad Táctica" para el Mundial 2026. Responde profesionalmente.`;
       const result = await callGemini(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent',
         { contents: [{ parts: [{ text: prompt }] }] }
       );
       setAiResult(result.candidates?.[0]?.content?.parts?.[0]?.text);
@@ -541,7 +544,7 @@ const App = () => {
                         <div className="bg-white/[0.02] backdrop-blur-md p-8 rounded-[2rem] border border-white/5 max-h-[400px] overflow-y-auto custom-scrollbar">
                           <div className="prose prose-invert prose-sm max-w-none">
                             {/* Aquí la IA entregará su contenido */}
-                            <div className="text-gray-300 leading-relaxed font-light text-sm">
+                            {/* <div className="text-gray-300 leading-relaxed font-light text-sm">
                               <ReactMarkdown 
                                 components={{
                                   h2: ({node, ...props}) => <h2 className="text-[#00ff88] font-black uppercase tracking-widest mt-6 mb-2 border-l-4 border-[#00ff88] pl-3" {...props} />,
@@ -551,6 +554,8 @@ const App = () => {
                               >
                                 {aiResult}
                               </ReactMarkdown>
+                            </div> */}
+                            <div>{aiResult}</div>
                           </div>
                         </div>
                         
@@ -592,14 +597,14 @@ const App = () => {
         </div>
       </footer>
 
-      <style>{`
+      {/* <style dangerouslySetInnerHTML={{ __html: `
         .perspective-1000 { perspective: 1000px; }
         .rotate-x-20 { transform: rotateX(20deg); }
         .rotate-y--10 { transform: rotateY(-10deg); }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0); }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 10px; }
-      `}</style>
+      ` }} /> */}
     </div>
   );
 };
