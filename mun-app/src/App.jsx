@@ -131,6 +131,18 @@ const App = () => {
   const [userInput, setUserInput] = useState('');
   const [savedStrategy, setSavedStrategy] = useState(null);
 
+  // 1. Validar la clave inmediatamente al cargar
+  useEffect(() => {
+    console.log("--- Verificación Técnica DEST MX ---");
+    console.log("API Key Detectada:", apiKey ? "SÍ ✅" : "NO ❌");
+  }, []);
+
+  // 2. Función de Cierre Garantizada
+  const forceCloseModal = () => {
+    setShowAiModal(false);
+    setUserInput('');
+  };
+
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
@@ -482,7 +494,7 @@ const App = () => {
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/95 backdrop-blur-3xl">
           <div className="bg-[#0f0f0f] border border-white/10 w-full max-w-3xl rounded-[4rem] overflow-hidden relative shadow-[0_0_100px_rgba(0,0,0,1)]">
             <button 
-              onClick={() => setShowAiModal(false)} 
+              onClick={forceCloseModal} 
               className="absolute z-50 top-10 right-10 text-gray-500 hover:text-[#00ff88] transition-all hover:scale-110 active:scale-95"
             >
               <X size={32} />
