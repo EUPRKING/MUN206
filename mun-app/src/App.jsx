@@ -215,10 +215,15 @@ const App = () => {
     if (!userInput) return;
     setAiResult(null);
     setAiLoading(true);
-    setAiMode('strategy');
-    setShowAiModal(true);
     try {
-      const prompt = `Actúa como Director Creativo de DEST MX. El cliente describe su evento así: "${userInput}". Genera una "Estrategia de Monumentalidad Táctica" para el Mundial 2026. Responde profesionalmente.`;
+      const prompt = `Actúa como Director Creativo de DEST MX. Genera una "Estrategia de Monumentalidad Táctica" para: "${userInput}". 
+      ESTRUCTURA OBLIGATORIA:
+      ## 1. ANÁLISIS DEL TERRENO
+      (Descripción del impacto)
+      ## 2. INTERVENCIÓN TÁCTICA
+      (Usa lista con viñetas para los productos de DEST MX involucrados)
+      ## 3. VISIÓN MONUMENTAL
+      (Conclusión profesional)`;
       const result = await callGemini(
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent',
         { contents: [{ parts: [{ text: prompt }] }] }
@@ -476,7 +481,12 @@ const App = () => {
       {showAiModal && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/95 backdrop-blur-3xl">
           <div className="bg-[#0f0f0f] border border-white/10 w-full max-w-3xl rounded-[4rem] overflow-hidden relative shadow-[0_0_100px_rgba(0,0,0,1)]">
-            <button onClick={() => setShowAiModal(false)} className="absolute z-20 text-gray-500 transition-colors top-10 right-10 hover:text-white"><X size={32} /></button>
+            <button 
+              onClick={() => setShowAiModal(false)} 
+              className="absolute z-50 top-10 right-10 text-gray-500 hover:text-[#00ff88] transition-all hover:scale-110 active:scale-95"
+            >
+              <X size={32} />
+            </button>
             <div className="p-12 md:p-16">
               <div className="flex items-center gap-4 mb-10">
                 <div className="p-4 bg-gradient-to-tr from-[#00ff88] to-[#00f2ff] rounded-[1.5rem] shadow-[0_0_30px_rgba(0,255,136,0.3)]"><Sparkles size={32} className="text-black" /></div>
@@ -543,19 +553,18 @@ const App = () => {
                         {/* Cuerpo de la Respuesta con mejor estilo */}
                         <div className="bg-white/[0.02] backdrop-blur-md p-8 rounded-[2rem] border border-white/5 max-h-[400px] overflow-y-auto custom-scrollbar">
                           <div className="prose prose-invert prose-sm max-w-none">
-                            {/* Aquí la IA entregará su contenido */}
-                            {/* <div className="text-gray-300 leading-relaxed font-light text-sm">
+                            <div className="text-gray-300 leading-relaxed font-light text-sm">
                               <ReactMarkdown 
                                 components={{
-                                  h2: ({node, ...props}) => <h2 className="text-[#00ff88] font-black uppercase tracking-widest mt-6 mb-2 border-l-4 border-[#00ff88] pl-3" {...props} />,
-                                  li: ({node, ...props}) => <li className="mb-2 list-disc list-inside text-gray-400" {...props} />,
-                                  strong: ({node, ...props}) => <strong className="text-[#00f2ff] font-bold" {...props} />
+                                  h2: ({node, ...props}) => <h2 className="text-[#00ff88] font-black uppercase tracking-widest mt-8 mb-4 border-l-4 border-[#00ff88] pl-4" {...props} />,
+                                  li: ({node, ...props}) => <li className="mb-3 list-disc list-inside text-gray-400 marker:text-[#00f2ff]" {...props} />,
+                                  strong: ({node, ...props}) => <strong className="text-[#00f2ff] font-bold" {...props} />,
+                                  p: ({node, ...props}) => <p className="mb-4" {...props} />
                                 }}
                               >
                                 {aiResult}
                               </ReactMarkdown>
-                            </div> */}
-                            <div>{aiResult}</div>
+                            </div>
                           </div>
                         </div>
                         
