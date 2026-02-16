@@ -551,7 +551,6 @@ const App = () => {
                               >
                                 {aiResult}
                               </ReactMarkdown>
-                            </div>
                           </div>
                         </div>
                         
