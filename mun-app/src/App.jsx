@@ -158,7 +158,7 @@ const App = () => {
   const callGemini = async (endpoint, payload, retries = 5, delay = 1000) => {
     if (!apiKey) throw new Error("API Key no detectada. Verifica tu archivo .env");
     try {
-      const response = await fetch(endpoint + `?key=${apiKey}`, {
+      const response = await fetch(endpoint + `?key=${apiKey.trim()}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -227,7 +227,7 @@ const App = () => {
     try {
       const prompt = `Actúa como Director Creativo de DEST MX. Genera una estrategia para: ${userInput}`;
       const result = await callGemini( // Usar gemini-2.0-flash para generación de texto
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
         { contents: [{ parts: [{ text: prompt }] }] }
       );
       setAiResult(result.candidates?.[0]?.content?.parts?.[0]?.text);
