@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Este bloque elimina los márgenes que suelen hacer que el diseño se vea "raro" */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #0a0a0a; /* El color oficial de DEST MX */
+  color: white;
+}
