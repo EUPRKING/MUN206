@@ -3,19 +3,15 @@ import './index.css';
 import ReactMarkdown from 'react-markdown';
 import { jsPDF } from 'jspdf';
 import { 
-  Shield, 
-  Smartphone, 
   Zap, 
   ChevronRight, 
   ShoppingBag, 
-  Activity, 
   Globe, 
   Mail, 
   MessageSquare,
   ArrowUpRight,
   Monitor,
   Target,
-  Layers,
   BarChart3,
   Sparkles,
   Volume2,
@@ -23,10 +19,7 @@ import {
   Loader2,
   X,
   Send,
-  Lightbulb,
   FileText,
-  Boxes,
-  Wind
 } from 'lucide-react';
 
 // API Configuration
@@ -163,6 +156,7 @@ const App = () => {
 
   // Gemini API Helper
   const callGemini = async (endpoint, payload, retries = 5, delay = 1000) => {
+    if (!apiKey) throw new Error("API Key no detectada. Verifica tu archivo .env");
     try {
       const response = await fetch(endpoint + `?key=${apiKey}`, {
         method: 'POST',
@@ -237,7 +231,7 @@ const App = () => {
       ## 3. VISIÓN MONUMENTAL
       (Conclusión profesional)`;
       const result = await callGemini(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
         { contents: [{ parts: [{ text: prompt }] }] }
       );
       setAiResult(result.candidates?.[0]?.content?.parts?.[0]?.text);
@@ -618,14 +612,14 @@ const App = () => {
         </div>
       </footer>
 
-      {/* <style dangerouslySetInnerHTML={{ __html: `
+      <style>{`
         .perspective-1000 { perspective: 1000px; }
         .rotate-x-20 { transform: rotateX(20deg); }
         .rotate-y--10 { transform: rotateY(-10deg); }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0); }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 10px; }
-      ` }} /> */}
+      `}</style>
     </div>
   );
 };
