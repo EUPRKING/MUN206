@@ -5,7 +5,6 @@ import { jsPDF } from 'jspdf';
 import { 
   Zap, 
   ChevronRight, 
-  ShoppingBag, 
   Globe, 
   Mail, 
   MessageSquare,
@@ -14,7 +13,6 @@ import {
   Target,
   BarChart3,
   Sparkles,
-  Volume2,
   Image as ImageIcon,
   Loader2,
   X,
@@ -165,11 +163,10 @@ const App = () => {
       });
       if (!response.ok) {
         const errorBody = await response.json().catch(() => null);
-        const message = errorBody?.error?.message || `Error: ${response.status}`;
+        const message = errorBody?.error?.message || `Error de la API: ${response.status}`;
         throw new Error(message);
-      } else if (response.status === 429) { // Manejo específico para cuota excedida
-        const errorBody = await response.json().catch(() => null);
-        const message = errorBody?.error?.message || "Cuota de API excedida. Por favor, espera o verifica tu plan de facturación.";
+      } else if (response.status === 429) { // Manejo específico para cuota excedida que ya tenías
+        const message = "Límite de cuota alcanzado. Por favor, espera 60 segundos antes de intentar de nuevo.";
         throw new Error(message);      }
       return await response.json();
     } catch (error) {
@@ -181,52 +178,17 @@ const App = () => {
     }
   };
 
-  // TTS Helper (Corrected WAV wrapping)
-  const pcmToWav = (pcmBase64, sampleRate = 24000) => {
-    const binaryString = atob(pcmBase64);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
-    const wavHeader = new ArrayBuffer(44);
-    const view = new DataView(wavHeader);
-    const writeString = (v, o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
-    writeString(view, 0, 'RIFF'); view.setUint32(4, 36 + bytes.byteLength, true);
-    writeString(view, 8, 'WAVE'); writeString(view, 12, 'fmt '); view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true); view.setUint16(22, 1, true); view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true);
-    writeString(view, 36, 'data'); view.setUint32(40, bytes.byteLength, true);
-    return new Blob([wavHeader, bytes.buffer], { type: 'audio/wav' });
-  };
-
-  const handleTTS = async (text) => {
-    setAiLoading(true);
-    try {
-      const result = await callGemini( // Usar gemini-2.0-flash para TTS
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', // Cambio de modelo a gemini-1.5-flash
-        { 
-          contents: [{ parts: [{ text: `Dilo con una voz elegante y tecnológica: ${text}` }] }],
-          generationConfig: { 
-            responseModalities: ["AUDIO"],
-            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } } 
-          }
-        }
-      );
-      const audioPart = result.candidates[0].content.parts.find(p => p.inlineData);
-      if (audioPart) {
-        const sampleRate = audioPart.inlineData.mimeType.match(/rate=(\d+)/)?.[1] || 24000;
-        const audio = new Audio(URL.createObjectURL(pcmToWav(audioPart.inlineData.data, parseInt(sampleRate))));
-        await audio.play();
-      }
-    } catch (err) { console.warn('Voz temporalmente no disponible por límite de cuota o error: ', err.message); } // Mensaje de error más específico y no bloqueante
-    finally { setAiLoading(false); }
-  };
+  // Las funciones pcmToWav y handleTTS han sido eliminadas para optimizar la cuota de la API.
+  // Cualquier referencia a gemini-2.5-flash-preview-tts también ha sido eliminada.
+  // El botón de audio (Volume2) de las tarjetas de producto ha sido eliminado.
 
   // Refactorizado para usar callGemini
   const handleGenerateStrategy = async () => {
     if (!userInput) return;
     setAiResult(null);
     setAiLoading(true);
-    setAiMode('strategy'); // Asegurarse de que el modo sea 'strategy'
-    setShowAiModal(true); // Mostrar el modal
+    setAiMode('strategy'); 
+    setShowAiModal(true); 
     try {
       const prompt = `Actúa como Director Creativo de DEST MX. Genera una estrategia para: ${userInput}`;
       const result = await callGemini( // Usa gemini-1.5-flash con v1beta, la URL se completa en callGemini
@@ -288,7 +250,7 @@ const App = () => {
       <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-end gap-3">
         <button 
           onClick={() => { setShowAiModal(true); setAiMode('strategy'); setAiResult(null); setSavedStrategy(null); }}
-          className="bg-gradient-to-tr from-[#00ff88] to-[#00f2ff] p-4 rounded-full shadow-[0_0_30px_rgba(0,255,136,0.5)] hover:scale-110 transition-transform flex items-center gap-2 group"
+          className="bg-gradient-to-tr from-[#00ff88] to-[#00f2ff] p-4 rounded-full shadow-[0_0_30px_rgba(0,255,136,0.5)] hover:scale-110 transition-transform flex items-center gap-2 group" // Mantener Sparkles para el botón principal
         >
           <Sparkles className="text-black" />
           <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 text-black font-bold uppercase text-[10px] tracking-widest whitespace-nowrap">Consultoría Estratégica ✨</span>
@@ -356,27 +318,7 @@ const App = () => {
             {filteredProducts.map((product) => (
               <div key={product.id} className="flex flex-col h-full bg-[#111] rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-[#00ff88]/30 transition-all duration-500 group">
                 <div className="w-full h-64 overflow-hidden">
-                  <img 
-                    src={product.img} 
-                    alt={product.name} 
-                    className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0" 
-                  />
-                </div>
-                <div className="flex flex-col flex-grow p-8">
-                  <div className="flex items-start justify-between mb-4">
-                    <h3 className="flex-1 text-2xl font-bold tracking-tight">{product.name}</h3>
-                    <p className="text-[#00f2ff] font-mono text-sm whitespace-nowrap ml-2">{product.price}</p>
-                  </div>
-                  <p className="flex-grow mb-6 text-sm leading-relaxed text-gray-400 line-clamp-2">{product.description}</p>
-                  <div className="flex items-center justify-between pt-6 mt-auto border-t border-white/5">
-                    <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">MOQ: {product.moq}</span>
-                    <button 
-                      onClick={() => handleTTS(`${product.name}: ${product.description}`)}
-                      className="text-xs font-bold uppercase tracking-widest hover:text-[#00ff88] transition-colors flex items-center gap-2"
-                    >
-                      <Volume2 size={14} />
-                    </button>
-                  </div>
+                  <img src={product.img} alt={product.name} className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110 grayscale sm:group-hover:grayscale-0" />
                 </div>
               </div>
             ))}
@@ -608,7 +550,7 @@ const App = () => {
           </div>
           <div className="flex gap-4">
              <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:border-[#00ff88] transition-colors cursor-pointer text-gray-400 hover:text-white"><Globe size={20} /></div>
-             <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:border-[#00f2ff] transition-colors cursor-pointer text-gray-400 hover:text-white"><ShoppingBag size={20} /></div>
+             {/* <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:border-[#00f2ff] transition-colors cursor-pointer text-gray-400 hover:text-white"><ShoppingBag size={20} /></div> */}
           </div>
         </div>
       </footer>
